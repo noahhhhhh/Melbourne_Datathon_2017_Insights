@@ -17,6 +17,8 @@ Below is a list of initial ideas we came up during the "standup". Let us generat
 - Txn Behaviour (Noah)
   - Shopper style
   - Basket analysis: association rule / word2vec
+    - drugs [done]
+    - disease
   - Shopping pattern for patients who got cured (potential best practice for other patients?)
   - etc.
 - Disease (Michael)
