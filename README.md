@@ -18,7 +18,8 @@ Below is a list of initial ideas we came up during the "standup". Let us generat
   - Shopper style
   - Basket analysis: association rule / word2vec
     - drugs [done]
-    - disease
+    - disease [done]
+  - chord diagram for disease transfer [done]
   - Shopping pattern for patients who got cured (potential best practice for other patients?)
   - etc.
 - Disease (Michael)
