@@ -20,7 +20,7 @@ Below is a list of initial ideas we came up during the "standup". Let us generat
     - drugs [done]
     - disease [done]
   - chord diagram for disease co-occurance [done]
-  - chord diagram for disease + never seen again
+  - chord diagram for disease + never seen again [done]
   - Shopping pattern for patients who got cured (potential best practice for other patients?)
   - etc.
 - Disease (Michael)
