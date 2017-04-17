@@ -24,6 +24,7 @@ dt_txn_drug[, MasterProductShortName := sub(" .*", "", MasterProductFullName)]
 # distinct ----------------------------------------------------------------
 
 dt_txn_drug = dt_txn_drug[, c("Transaction_ID", "MasterProductShortName"), with = F]
+dt_txn_drug = dt_txn_drug[order(MasterProductShortName)]
 dt_txn_drug = dt_txn_drug[!duplicated(dt_txn_drug)]
 
 
