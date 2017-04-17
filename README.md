@@ -19,7 +19,7 @@ Below is a list of initial ideas we came up during the "standup". Let us generat
   - Basket analysis: association rule / word2vec
     - drugs [done]
     - disease [done]
-  - chord diagram for disease transfer [done]
+  - chord diagram for disease co-occurance [done]
   - Shopping pattern for patients who got cured (potential best practice for other patients?)
   - etc.
 - Disease (Michael)
