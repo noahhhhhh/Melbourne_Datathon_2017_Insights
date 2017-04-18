@@ -12,10 +12,11 @@ Below is a list of initial ideas we came up during the "standup". Let us generat
   - Loyalty segmentation
   - Store of choice
   - Descriptive stats on demographic
+  - Shopper style
+  - Big shopper
   - (Patient ID could help impute age?)
   - etc.
 - Txn Behaviour (Noah)
-  - Shopper style
   - Basket analysis: association rule / word2vec
     - drugs [done]
     - disease [done]
