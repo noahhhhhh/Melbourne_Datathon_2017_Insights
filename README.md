@@ -12,15 +12,16 @@ Below is a list of initial ideas we came up during the "standup". Let us generat
   - Loyalty segmentation
   - Store of choice
   - Descriptive stats on demographic
+  - Shopper style
+  - Big shopper
   - (Patient ID could help impute age?)
   - etc.
 - Txn Behaviour (Noah)
-  - Shopper style
   - Basket analysis: association rule / word2vec
     - drugs [done]
     - disease [done]
   - chord diagram for disease co-occurance [done]
-  - chord diagram for disease + never seen again
+  - chord diagram for disease + never seen again [done]
   - Shopping pattern for patients who got cured (potential best practice for other patients?)
   - etc.
 - Disease (Michael)
