@@ -25,7 +25,7 @@ Below is a list of initial ideas we came up during the "standup". Let us generat
   - Shopping pattern for patients who got cured (potential best practice for other patients?)
   - etc.
 - Disease (Michael)
-  - Customer journey/Sankey chart on disease transition/Markov Chain
+  - Customer journey/Sankey chart on disease transition/Markov Chain [done, might need decoration later]
   - Condition analysis for Symptons/Ingredients vs. Disease
   - etc.
 - Drug (Max)
