@@ -34,7 +34,7 @@ Below is a list of initial ideas we came up during the "standup". Let us generat
   - etc.
   
   
-### The second week [JUst realised we have one extra week!]
+### The second week [Just realised we have one extra week!]
 The second week (hopefully we could start this stage sooner) would be **story making**.
 An agreed guideline is to make our story **easy to understand for general audience**, **engaging**, and **interesting/useful**. Try to avoid covering everything. Focusing on one or two things would be sufficient.
 
