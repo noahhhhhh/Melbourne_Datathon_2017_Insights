@@ -20,7 +20,7 @@
   - IsBannerGroup
   - State
   - postcode
- - Calculate the compliance level at a more detailed **drug level**
+- Calculate the compliance level at a more detailed **drug level**
   - BrandName
   - EthicalCategoryName
   - EthicalSubCategoryName
