@@ -1,4 +1,4 @@
-# Compliance
+# How to calc Non-Compliance Level
 - Remove duplicates
 - Calculate the purhcase interval at a Patient_ID, Drug level.
   (*Only include the drug which a patient has purhcased more than 5 times*)
@@ -11,7 +11,7 @@
 - Calculate the MAD (Median Absolute Deviation) at a Drug level
   - Treat this as the **compliance** level for a drug, the higher the MAD is, the lower compliance level the drug is
 
-## Ideas 
+## Foundings 
 *(All points below nneds to consider the sample size, avoid small sample size)*
 - **illness level**
   (*Remoe 2016 and forward as diabetes patients are missing*)
