@@ -21,12 +21,34 @@
   - State
   - postcode
 - Calculate the compliance level at a more detailed **drug level**
+  - EthicalCategoryName (Branded)
+    - Generic drugs have the lowest non-compliance level, followed by Substitutable and Branded. See plots:
+      - Non-Compliance Index by Brand
+      - Non-Compliance Index by Brand (Chronic Illness Drugs)
+  - EthicalSubCategoryName (PBS)
+    - Majority of drugs which are most popular and compliant are covered by PBS, except a few. See plots:
+      - Non-Compliance Index for Top 200 Popular Drugs
+      - Top 5 Most Popular and Comliant Chronical Illness Drugs which are not in the PBS
+      - Top 10 Most Popular and Comliant Drugs which are not in the PBS
   - BrandName
-  - EthicalCategoryName
-  - EthicalSubCategoryName
+    - Good ones
+      - COVERSYL PLUS: popularity top 30, non-compliance index = 0.741
+      - XARELTO: popularity top 49, non-compliance index = 0.926
+    - Bad ones
+      - MINAX: popularity top 46, non-compliance index = 3.71
+      - ASMOL CFC FREE: popularity top 47, non-compliance index = 3.71
+      - MINIPRESS: popularity top 91, non-compliance index = 3.21
   - ManufacturerName
+    - nothing interesting
   - GenericIngredientName
+    - Good ones
+      - RIVAROXABAN: popularity top 55, non-compliance index = 0.92
+      - RALOXIFENE: popularity top 94, non-compliance index = 1.06
+    - Bad ones
+      - PREDNISOLONE: popularity top 75, non-compliance index = 3.82
+      - SPIRONOLACTONE: popularity top 90, non-compliance index = 5.19
   - ATCLevel
+    - nothing interesting
 - Calculate the compliance level at a **patient level**
   - postcode
   - patient who shop more
