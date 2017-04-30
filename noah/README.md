@@ -30,7 +30,7 @@
       - Non-Compliance Index by Brand (Chronic Illness Drugs)
   - EthicalSubCategoryName (PBS)
     - Majority of drugs which are most popular and compliant are covered by PBS, except a few. 
-      - ATORVASTATIN, MONOPLUS, PROTOS SACH are extremetly popular medicines and with very low non-compliance level, BUT they are not in PBS. See plots:
+      - **ATORVASTATIN, MONOPLUS, PROTOS SACH are extremetly popular medicines and with very low non-compliance level, BUT they are not in PBS. See plots**:
         - Non-Compliance Index for Top 200 Popular Drugs
         - Top 5 Most Popular and Comliant Chronical Illness Drugs which are not in the PBS
         - Top 10 Most Popular and Comliant Drugs which are not in the PBS
