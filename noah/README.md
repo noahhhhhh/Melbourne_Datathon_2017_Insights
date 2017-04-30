@@ -13,7 +13,7 @@
 
 ## Findings 
 *(All points below nneds to consider the sample size, avoid small sample size)*
-- **illness level**
+- **illness level** [Done]
   (*Remoe 2016 and forward as diabetes patients are missing*)
   - which illness has the highest/lowest compliance level
     - Hypertension is the illness with the lowest non-compliance index (used sd of drug non-compliance index)
