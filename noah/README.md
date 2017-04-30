@@ -16,6 +16,9 @@
 - **illness level**
   (*Remoe 2016 and forward as diabetes patients are missing*)
   - which illness has the highest/lowest compliance level
+    - Hypertension is the illness with the lowest non-compliance index (used sd of drug non-compliance index)
+    - Diabetes is the most non-compliant illness!? see screenshot
+      - Non-Compliance Index by ChronicIllness
 - **store level** [Done]
   - IsBannerGroup
     - nothing interesting
