@@ -13,14 +13,14 @@
 
 ## Ideas 
 *(All points below nneds to consider the sample size, avoid small sample size)*
-- Calculate the compliance level at an **illness level**
+- **illness level**
   (*Remoe 2016 and forward as diabetes patients are missing*)
   - which illness has the highest/lowest compliance level
-- Calculate the compliance level at a **store level**
+- **store level**
   - IsBannerGroup
   - State
   - postcode
-- Calculate the compliance level at a more detailed **drug level**
+- **drug level**
   - EthicalCategoryName (Branded)
     - Generic drugs have the lowest non-compliance level, followed by Substitutable and Branded. See plots:
       - Non-Compliance Index by Brand
@@ -49,13 +49,13 @@
       - SPIRONOLACTONE: popularity top 90, non-compliance index = 5.19
   - ATCLevel
     - nothing interesting
-- Calculate the compliance level at a **patient level**
+- **patient level**
   - postcode
   - patient who shop more
   - patient who has 1, 2, 3, ..., illnesses
   - patient who shop more but spend less
-- Calculate the compliance level at a **prescriber level**
-- Calculate the compliance level over time
+- **prescriber level**
+- **time level**
   - a patient from smaller no. of illness to larger no. of illness
   - month
   - year
