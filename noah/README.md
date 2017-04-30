@@ -59,7 +59,7 @@
   - patient who has 1, 2, 3, ..., illnesses
   - patient who shop more but spend less
 - **prescriber level** [Done]
-  - Prescriber 1638 has the lowest non-compliance level (1.313) within top 100 most popular prescribers
+  - Prescriber 1638 has the lowest non-compliance index (1.313) within top 100 most popular prescribers
     - 1.313 means only 1.313 week deviation from the standard drug frequency
 - **time level**
   - a patient from smaller no. of illness to larger no. of illness
