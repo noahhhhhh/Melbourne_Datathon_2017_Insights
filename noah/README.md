@@ -11,7 +11,7 @@
 - Calculate the MAD (Median Absolute Deviation) at a Drug level
   - Treat this as the **compliance** level for a drug, the higher the MAD is, the lower compliance level the drug is
 
-## Foundings 
+## Findings 
 *(All points below nneds to consider the sample size, avoid small sample size)*
 - **illness level**
   (*Remoe 2016 and forward as diabetes patients are missing*)
