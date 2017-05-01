@@ -199,5 +199,19 @@ ggplot(dt_atc_drug, aes(x = ATCLevel2Name, y = mad, fill = ATCLevel2Name)) +
   ggtitle("Non-Compliance Index by ATCLevel2Name") +
   xlab("Branded") +
   ylab("Non-Compliance Index")
-  
+
+# illness
+dt_illness_compliance = merge(dt_drug_freq_pop_norm, dt_ilness, by.x = "Drug_ID", by.y = "MasterProductID")
+
+dt_illness_compliance_norm = dt_illness_compliance[
+                                         , .(mad_mean = mean(mad)
+                                             , mad_sd = sd(mad)
+                                             ), by = ChronicIllness]
+
+
+setorder(dt_illness_compliance_norm, mad_sd)
+
+
+dt_illness_compliance_norm[, .(ChronicIllness, med, sd, pop)]
+
 
