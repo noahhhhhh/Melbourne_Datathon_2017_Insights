@@ -122,7 +122,7 @@ ggplot(dt_patient_compliance_more[Non_Compliance_Index < quant_nonComplianceInde
 # drug vs. non compliance index
 ggplot(dt_patient_compliance_more[Non_Compliance_Index < quant_nonComplianceIndex[["80%"]] & 
                                     N_TXNs <= quant_N_TXNs[["90%"]] &
-                                    N_TXNs >= quant_N_TXNs[["10%"]]]
+                                    N_TXNs >=   quant_N_TXNs[["10%"]]]
        , aes(x = as.factor(N_Drugs), y = Non_Compliance_Index)) +
   geom_boxplot()
 
@@ -132,3 +132,7 @@ ggplot(dt_patient_compliance_more[Non_Compliance_Index < quant_nonComplianceInde
                                     N_TXNs >= quant_N_TXNs[["10%"]]]
        , aes(x = as.factor(N_Illness), y = Non_Compliance_Index)) +
   geom_boxplot()
+
+# illness again
+merge(dt_patient_drug_compliance, dt_ilness, by.x = "Drug_ID", by.y = "MasterProductID")[, .(Non_Compliance_Index = sd(abs(weekDiff - IPI))), by = ChronicIllness]
+

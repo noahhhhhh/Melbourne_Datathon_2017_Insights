@@ -7,15 +7,24 @@ require(RColorBrewer)
 # remove duplicates -------------------------------------------------------
 
 
-x = dt_txn[!duplicated(dt_txn)]
+dt_txn = dt_txn[!duplicated(dt_txn)]
 
 
 # data patient, drug, week ------------------------------------------------
 
 
-dt_patient_drug_week = x[, .(Patient_ID, Drug_ID, Dispense_Week, RepeatsTotal_Qty, RepeatsLeft_Qty, Script_Qty)]
+dt_patient_drug_week = dt_txn[, .(Patient_ID, Prescriber_ID, Drug_ID, Prescription_Week, Dispense_Week, RepeatsTotal_Qty, RepeatsLeft_Qty, Script_Qty)]
+dt_patient_drug_week[, Prescription_Item_ID := paste0(Patient_ID, Prescriber_ID, as.numeric(as.Date(Prescription_Week)), Script_Qty, Drug_ID)]
+dt_patient_drug_week[, Prescription_ID := paste0(Patient_ID, Prescriber_ID, as.numeric(as.Date(Prescription_Week)))]
 
-setorderv(dt_patient_drug_week, c("Patient_ID", "Drug_ID", "Dispense_Week"))
+dt_patient_drug_week = merge(dt_patient_drug_week, dt_drug[, .(MasterProductID, PackSizeNumber)], by.x = "Drug_ID", by.y = "MasterProductID")
+
+setorderv(dt_patient_drug_week, c("Patient_ID", "Prescriber_ID", "Drug_ID", "Dispense_Week", "Script_Qty"))
+
+
+# removve Script_Qty / PackSizeNumber with decimals -----------------------
+
+dt_patient_drug_week = dt_patient_drug_week[Script_Qty %% PackSizeNumber == 0]
 
 
 # bought a drug for more than 5 times -------------------------------------
@@ -24,7 +33,7 @@ setorderv(dt_patient_drug_week, c("Patient_ID", "Drug_ID", "Dispense_Week"))
 dt_patient_drug_week_N = dt_patient_drug_week[, .N , by = c("Patient_ID", "Drug_ID")]
 dt_patient_drug_week_N[N > 5]
 
-dt_patient_drug_week_5 = merge(dt_patient_drug_week, dt_patient_drug_week_N[N > 5], by = c("Patient_ID", "Drug_ID"))
+dt_patient_drug_week = merge(dt_patient_drug_week, dt_patient_drug_week_N[N > 5], by = c("Patient_ID", "Drug_ID"))
 
 
 
@@ -37,9 +46,9 @@ diffWeeks = function(date1, date2){
   return(x)
 }
 
-dt_patient_drug_week_5[, interval := RepeatsLeft_Qty - shift(RepeatsLeft_Qty, type = "lead"), by = c("Patient_ID", "Drug_ID")]
-dt_patient_drug_week_5[, interval_adjusted := ifelse(interval < 0, shift(RepeatsTotal_Qty, type = "lead") - shift(RepeatsLeft_Qty, type = "lead"), interval)]
-dt_patient_drug_weekDiff = dt_patient_drug_week_5[, weekDiff := diffWeeks(shift(Dispense_Week, 1, type = "lead"), Dispense_Week) / interval_adjusted, by = c("Patient_ID", "Drug_ID")]
+dt_patient_drug_week[, interval := RepeatsLeft_Qty - shift(RepeatsLeft_Qty, type = "lead"), by = c("Patient_ID", "Drug_ID")]
+dt_patient_drug_week[, interval_adjusted := ifelse(interval < 0, (shift(RepeatsTotal_Qty, type = "lead") - shift(RepeatsLeft_Qty, type = "lead")) * (Script_Qty / PackSizeNumber), interval * (Script_Qty / PackSizeNumber))]
+dt_patient_drug_weekDiff = dt_patient_drug_week[, weekDiff := diffWeeks(shift(Dispense_Week, 1, type = "lead"), Dispense_Week) / interval_adjusted, by = c("Patient_ID", "Drug_ID")]
 
 
 # remove outliers ---------------------------------------------------------
@@ -50,11 +59,15 @@ dt_patient_drug_weekDiff = dt_patient_drug_weekDiff[!is.na(weekDiff)]
 
 # normal weekDiff
 weekDiff_normal = quantile(dt_patient_drug_weekDiff$weekDiff, probs = seq(0, 1, .05), na.rm = T)
-# 0%      5%     10%     15%     20%     25%     30%     35%     40%     45%     50%     55% 
-#   0       3       3       4       4       4       4       4       5       5       5       7 
-# 60%     65%     70%     75%     80%     85%     90%     95%    100% 
-# 10      14      16      17      19      29  345600 1468800     Inf 
-dt_normal = dt_patient_drug_weekDiff[, all(weekDiff >= 1 & weekDiff <= weekDiff_normal[["85%"]]), by = .(Patient_ID, Drug_ID)]
+# 0%           5%          10%          15%          20%          25% 
+#   -Inf 0.000000e+00 2.000000e+00 3.000000e+00 3.000000e+00 4.000000e+00 
+# 30%          35%          40%          45%          50%          55% 
+#   4.000000e+00 4.000000e+00 4.000000e+00 5.000000e+00 5.000000e+00 5.833333e+00 
+# 60%          65%          70%          75%          80%          85% 
+#   7.000000e+00 8.000000e+00 9.000000e+00 1.100000e+01 2.350000e+01 2.592000e+05 
+# 90%          95%         100% 
+# 5.616000e+05          Inf          Inf 
+dt_normal = dt_patient_drug_weekDiff[, all(weekDiff >= 1 & weekDiff <= weekDiff_normal[["80%"]]), by = .(Patient_ID, Drug_ID)]
 dt_normal = dt_normal[V1 == T]
 dt_patient_drug_weekDiff_norm = merge(dt_normal, dt_patient_drug_weekDiff, by = c("Patient_ID", "Drug_ID"))
 
