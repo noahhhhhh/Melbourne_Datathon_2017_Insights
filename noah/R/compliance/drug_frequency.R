@@ -13,13 +13,11 @@ dt_txn = dt_txn[!duplicated(dt_txn)]
 # data patient, drug, week ------------------------------------------------
 
 
-dt_patient_drug_week = dt_txn[, .(Patient_ID, Prescriber_ID, Drug_ID, Prescription_Week, Dispense_Week, RepeatsTotal_Qty, RepeatsLeft_Qty, Script_Qty)]
-dt_patient_drug_week[, Prescription_Item_ID := paste0(Patient_ID, Prescriber_ID, as.numeric(as.Date(Prescription_Week)), Script_Qty, Drug_ID)]
-dt_patient_drug_week[, Prescription_ID := paste0(Patient_ID, Prescriber_ID, as.numeric(as.Date(Prescription_Week)))]
+dt_patient_drug_week = dt_txn[, .(Store_ID, Patient_ID, Prescriber_ID, Drug_ID, Prescription_Week, Dispense_Week, RepeatsTotal_Qty, RepeatsLeft_Qty, Script_Qty)]
 
 dt_patient_drug_week = merge(dt_patient_drug_week, dt_drug[, .(MasterProductID, PackSizeNumber)], by.x = "Drug_ID", by.y = "MasterProductID")
 
-setorderv(dt_patient_drug_week, c("Patient_ID", "Prescriber_ID", "Drug_ID", "Dispense_Week", "Script_Qty"))
+setorderv(dt_patient_drug_week, c("Patient_ID", "Prescriber_ID", "Prescription_Week", "Drug_ID", "Dispense_Week", "Script_Qty"))
 
 
 # removve Script_Qty / PackSizeNumber with decimals -----------------------
@@ -46,9 +44,9 @@ diffWeeks = function(date1, date2){
   return(x)
 }
 
-dt_patient_drug_week[, interval := RepeatsLeft_Qty - shift(RepeatsLeft_Qty, type = "lead"), by = c("Patient_ID", "Drug_ID")]
+dt_patient_drug_week[, interval := RepeatsLeft_Qty - shift(RepeatsLeft_Qty, type = "lead"), by = c("Prescriber_ID", "Prescription_Week", "Patient_ID", "Drug_ID")]
 dt_patient_drug_week[, interval_adjusted := ifelse(interval < 0, (shift(RepeatsTotal_Qty, type = "lead") - shift(RepeatsLeft_Qty, type = "lead")) * (Script_Qty / PackSizeNumber), interval * (Script_Qty / PackSizeNumber))]
-dt_patient_drug_weekDiff = dt_patient_drug_week[, weekDiff := diffWeeks(shift(Dispense_Week, 1, type = "lead"), Dispense_Week) / interval_adjusted, by = c("Patient_ID", "Drug_ID")]
+dt_patient_drug_weekDiff = dt_patient_drug_week[, weekDiff := diffWeeks(shift(Dispense_Week, 1, type = "lead"), Dispense_Week) / interval_adjusted, by = c("Prescriber_ID", "Prescription_Week", "Patient_ID", "Drug_ID")]
 
 
 # remove outliers ---------------------------------------------------------
@@ -58,6 +56,7 @@ dt_patient_drug_weekDiff = dt_patient_drug_week[, weekDiff := diffWeeks(shift(Di
 dt_patient_drug_weekDiff = dt_patient_drug_weekDiff[!is.na(weekDiff)]
 
 # normal weekDiff
+# dt_q90 = dt_patient_drug_weekDiff[, .(q90 = quantile(weekDiff, .9, na.rm = T)), by = .(Patient_ID, Drug_ID, Prescriber_ID, Prescription_Week)]
 weekDiff_normal = quantile(dt_patient_drug_weekDiff$weekDiff, probs = seq(0, 1, .05), na.rm = T)
 # 0%           5%          10%          15%          20%          25% 
 #   -Inf 0.000000e+00 2.000000e+00 3.000000e+00 3.000000e+00 4.000000e+00 
@@ -67,35 +66,29 @@ weekDiff_normal = quantile(dt_patient_drug_weekDiff$weekDiff, probs = seq(0, 1, 
 #   7.000000e+00 8.000000e+00 9.000000e+00 1.100000e+01 2.350000e+01 2.592000e+05 
 # 90%          95%         100% 
 # 5.616000e+05          Inf          Inf 
-dt_normal = dt_patient_drug_weekDiff[, all(weekDiff >= 1 & weekDiff <= weekDiff_normal[["80%"]]), by = .(Patient_ID, Drug_ID)]
+# dt_patient_drug_weekDiff = merge(dt_patient_drug_weekDiff, dt_q90, by = c("Prescriber_ID", "Prescription_Week", "Patient_ID", "Drug_ID"))
+dt_normal = dt_patient_drug_weekDiff[, all(weekDiff >= 1 & weekDiff <= weekDiff_normal[["90%"]]), by = .(Patient_ID, Drug_ID)]
 dt_normal = dt_normal[V1 == T]
 dt_patient_drug_weekDiff_norm = merge(dt_normal, dt_patient_drug_weekDiff, by = c("Patient_ID", "Drug_ID"))
+# dt_patient_drug_weekDiff_norm = dt_patient_drug_weekDiff[weekDiff <= q90]
 
 # normal weekDiff by drug
-dt_drug_weekDiff_normal = dt_patient_drug_weekDiff_norm[, .(WD_q05 = quantile(weekDiff, probs = c(.05), na.rm = T)
-                                                    , WD_q85 = quantile(weekDiff, probs = c(.85), na.rm = T)), by = Drug_ID]
+  
+dt_drug_freq_pop_norm = dt_patient_drug_weekDiff_norm[, .(IPI = median(weekDiff)
+                                                          , pop = .N), by = Drug_ID]
 
-# normal popularity by drug
-dt_drug_pop_normal = dt_patient_drug_weekDiff_norm[, .(N_q05 = quantile(N, probs = c(.05), na.rm = T)
-                                                  , N_q85 = quantile(N, probs = c(.85), na.rm = T)), by = Drug_ID]
-
-# drug frequency and popularity -------------------------------------------
-
-dt_drug_freq = merge(dt_patient_drug_weekDiff_norm, dt_drug_weekDiff_normal, by = c("Drug_ID"))
-dt_drug_freq_pop = merge(dt_drug_freq, dt_drug_pop_normal, by = c("Drug_ID"))
-
-dt_drug_freq_pop_norm = dt_drug_freq_pop[weekDiff >= WD_q05 & weekDiff <= WD_q85 & N >= N_q05 & N <= N_q85
-                 , .(med = median(weekDiff)
-                     , mad = mad(weekDiff)
-                     , coeff_med = mad(weekDiff) / median(weekDiff)
-                     , mean = mean(weekDiff)
-                     , sd = sd(weekDiff)
-                     , coeff_var = var(weekDiff) / mean(weekDiff)
-                     , pop = .N), by = Drug_ID]
+# dt_drug_freq_pop_norm = dt_drug_freq_pop[weekDiff >= WD_q05 & weekDiff <= WD_q85 & N >= N_q05 & N <= N_q85
+#                  , .(med = median(weekDiff)
+#                      , mad = mad(weekDiff)
+#                      , coeff_med = mad(weekDiff) / median(weekDiff)
+#                      , mean = mean(weekDiff)
+#                      , sd = sd(weekDiff)
+#                      , coeff_var = var(weekDiff) / mean(weekDiff)
+#                      , pop = .N), by = Drug_ID]
 
 dt_drug_freq_pop_norm[, rankN := frank(-pop, ties.method = "first")]
 
-setorder(dt_drug_freq_pop_norm, mad)
+# setorder(dt_drug_freq_pop_norm, mad)
 
 saveRDS(dt_drug_freq_pop_norm, "../../data/MelbDatathon2017/New/dt_drug_freq_pop_norm.rds")
 

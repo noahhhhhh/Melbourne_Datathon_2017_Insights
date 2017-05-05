@@ -52,7 +52,7 @@ weekDiff_normal = quantile(dt_patient_drug_weekDiff$weekDiff, probs = seq(0, 1, 
 #   0       3       3       4       4       4       4       4       5       5       5       7 
 # 60%     65%     70%     75%     80%     85%     90%     95%    100% 
 # 10      14      16      17      19      29  345600 1468800     Inf 
-dt_normal = dt_patient_drug_weekDiff[, all(weekDiff >= 1 & weekDiff <= weekDiff_normal[["85%"]]), by = .(Patient_ID, Drug_ID)]
+dt_normal = dt_patient_drug_weekDiff[, all(weekDiff >= 1 & weekDiff <= weekDiff_normal[["90%"]]), by = .(Patient_ID, Drug_ID)]
 dt_normal = dt_normal[V1 == T]
 dt_patient_drug_weekDiff_norm = merge(dt_normal, dt_patient_drug_weekDiff, by = c("Patient_ID", "Drug_ID"))
 
@@ -81,12 +81,38 @@ dt_drug_freq_pop_norm = readRDS("../../data/MelbDatathon2017/New/dt_drug_freq_po
 # merge patient and drug --------------------------------------------------
 
 
-dt_patient_drug_compliance = merge(dt_patient_drug_weekDiff_norm[, .(Store_ID, Patient_ID, Drug_ID, weekDiff, Dispense_Week)], dt_drug_freq_pop_norm[, .(Drug_ID, med)], by = "Drug_ID")
-dt_patient_drug_compliance = dt_patient_drug_compliance[, .(Store_ID, Patient_ID, Drug_ID, Dispense_Week, weekDiff, med)]
-setnames(dt_patient_drug_compliance, c("Store_ID", "Patient_ID", "Drug_ID", "Dispense_Week", "weekDiff", "IPI"))
+dt_patient_drug_compliance = merge(dt_patient_drug_weekDiff[, .(Store_ID, Patient_ID, Drug_ID, weekDiff, Dispense_Week)], dt_drug_freq_pop_norm[, .(Drug_ID, IPI)], by = "Drug_ID")
+dt_patient_drug_compliance = dt_patient_drug_compliance[, .(Store_ID, Patient_ID, Drug_ID, Dispense_Week, weekDiff, IPI)]
+# setnames(dt_patient_drug_compliance, c("Store_ID", "Patient_ID", "Drug_ID", "Dispense_Week", "weekDiff", "IPI"))
+
+quant_week_diff = quantile(dt_patient_drug_compliance$weekDiff, seq(0, 1, .05))
+
+dt_patient_drug_compliance = dt_patient_drug_compliance[weekDiff <= quant_week_diff[["95%"]] & weekDiff > 1]
 
 saveRDS(dt_patient_drug_compliance, "../../data/MelbDatathon2017/New/dt_patient_drug_compliance.rds")
 
+
+# store -------------------------------------------------------------------
+
+# chronic
+dt_chronic_patient_drug_compliance = merge(dt_patient_drug_compliance, dt_ilness[, .(ChronicIllness, MasterProductID)], by.x = "Drug_ID", by.y = "MasterProductID")
+
+
+dt_store_compliance = dt_chronic_patient_drug_compliance[, .(Non_Compliance_Index = mean(weekDiff / IPI)), by = Store_ID]
+
+range01 = function(x){(x-min(x))/(max(x)-min(x))}
+
+dt_store_compliance[, Non_Compliance_Index := range01(Non_Compliance_Index)]
+dt_store_compliance[, Compliance := 1 - Non_Compliance_Index]
+dt_store_compliance[, Non_Compliance_Index := NULL]
+
+saveRDS(dt_store_compliance, "../../data/MelbDatathon2017/New/dt_store_compliance.rds")
+write.csv(dt_store_compliance, "../../data/MelbDatathon2017/New/dt_store_compliance.csv", row.names = F)
+
+
+dt_store_compliance_more = merge(dt_store_compliance, dt_store, by = "Store_ID")
+
+xx = dt_store_compliance_more[, .(Compliance = mean(Compliance)), by = StateCode]
 
 # patient -----------------------------------------------------------------
 
@@ -103,7 +129,7 @@ setnames(dt_patietn_illness_N, c("Patient_ID", "N_Illness"))
 
 # merge patient and patient drug compliance -------------------------------
 
-dt_patient_compliance = dt_patient_drug_compliance[, .(Non_Compliance_Index = sd(abs(weekDiff - IPI))), by = Patient_ID]
+dt_patient_compliance = dt_patient_drug_compliance_norm[, .(Non_Compliance_Index = mean(weekDiff / IPI)), by = Patient_ID]
 dt_patient_compliance_more = merge(merge(merge(dt_patient_compliance, dt_patient_txn_N, by = "Patient_ID")
                                          , dt_patietn_drug_N, by = "Patient_ID")
                                    , dt_patietn_illness_N, by = "Patient_ID")
@@ -111,23 +137,24 @@ dt_patient_compliance_more = merge(merge(merge(dt_patient_compliance, dt_patient
 
 
 # txn vs. non compliance index
-quant_nonComplianceIndex = quantile(dt_patient_compliance_more$Non_Compliance_Index, seq(0, 1, .1))
+quant_nonComplianceIndex = quantile(dt_patient_compliance_more$Non_Compliance_Index, seq(0, 1, .05))
 quant_N_TXNs = quantile(dt_patient_compliance_more$N_TXNs, seq(0, 1, .1))
-ggplot(dt_patient_compliance_more[Non_Compliance_Index < quant_nonComplianceIndex[["90%"]] & 
+
+ggplot(dt_patient_compliance_more[Non_Compliance_Index < quant_nonComplianceIndex[["95%"]] & 
                                     N_TXNs <= quant_N_TXNs[["90%"]] &
                                     N_TXNs >= quant_N_TXNs[["10%"]]]
        , aes(x = N_TXNs, y = Non_Compliance_Index, colour = Non_Compliance_Index)) +
   geom_point()
 
 # drug vs. non compliance index
-ggplot(dt_patient_compliance_more[Non_Compliance_Index < quant_nonComplianceIndex[["80%"]] & 
+ggplot(dt_patient_compliance_more[Non_Compliance_Index < quant_nonComplianceIndex[["95%"]] & 
                                     N_TXNs <= quant_N_TXNs[["90%"]] &
                                     N_TXNs >=   quant_N_TXNs[["10%"]]]
        , aes(x = as.factor(N_Drugs), y = Non_Compliance_Index)) +
   geom_boxplot()
 
 # illness vs. non compliance index
-ggplot(dt_patient_compliance_more[Non_Compliance_Index < quant_nonComplianceIndex[["80%"]] & 
+ggplot(dt_patient_compliance_more[Non_Compliance_Index < quant_nonComplianceIndex[["95%"]] & 
                                     N_TXNs <= quant_N_TXNs[["90%"]] &
                                     N_TXNs >= quant_N_TXNs[["10%"]]]
        , aes(x = as.factor(N_Illness), y = Non_Compliance_Index)) +
